@@ -1,52 +1,59 @@
-"""import Scraping
-sampleScraping = Scraping.Scraping()
-sampleScraping.sampleSoup()
-while(True):
-    None
-"""
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome import service as fs
-from time import sleep
-import ssl
-from bs4 import BeautifulSoup
-from urllib import request
+import Scraping
 import saveMovie
 import sys
+import tkinter
+from tkinter import messagebox
+from tkinter import filedialog
+from tkinter import ttk
+root = tkinter.Tk()
+root.title(u"ストーリーほぞんあぷり")
+root.geometry("400x120")
+LABEL_POS = 5
+TEXTBOX_POS = 200
+BASE_VERTICAL_POS = 10
+VERTICAL_SPACE = 20
 
-WAIT_TIME = 2
+# ボタンが押されるとここが呼び出される
+def DeleteEntryValue(event):
+    scraping = Scraping.Scraping()
+    url = urlBox.get()
+    userName = userNameBox.get()
+    password = passwordBox.get()
+    if (url == "" or password == "" or userName == "") :
+        messagebox.showerror("エラー", "すべての項目を入力してください")
+        return
+    scraping.getUrl(url)
+    scraping.getUserName(userName)
+    scraping.getPassWord(password)
+    filePath = filedialog.asksaveasfilename(initialdir = saveMovie.getDownloadsPath(), title = "Save as", defaultextension = "mp4")
+    if (filePath == ""):
+        return
+    if(scraping.getMovie(url, filePath) == False):
+        messagebox.showerror("エラー", "動画を作成できませんでした\nヒント：ストーリーは静止画では保存できません")
+    else:
+        urlBox.delete(0, tkinter.END)
+        messagebox.showinfo("メッセージ", "動画作成を終了しました")
 
-def stop():
-    while True:
-        None
+#エントリー
+urlLabel = tkinter.Label(text = "ストーリーのURLを貼り付けてください")
+urlLabel.place(x = LABEL_POS, y = BASE_VERTICAL_POS)
+urlBox = tkinter.Entry(width = 30)
+urlBox.place(x = TEXTBOX_POS, y = BASE_VERTICAL_POS)
 
-# ブラウザエンジンでHTMLを生成させる
+userNameLabel = tkinter.Label(text = "ユーザー名を入力してください")
+userNameLabel.place(x = LABEL_POS, y = BASE_VERTICAL_POS + VERTICAL_SPACE)
+userNameBox = tkinter.Entry(width = 30)
+userNameBox.place(x = TEXTBOX_POS, y = BASE_VERTICAL_POS + VERTICAL_SPACE)
 
-instaUrl = sys.argv[1]
-CHROME_DRIVER_PATH = "./chromedriver.exe"
-chrome_service = fs.Service(executable_path=CHROME_DRIVER_PATH)
-browser = webdriver.Chrome(service=chrome_service)
-browser.get(instaUrl)
-sleep(WAIT_TIME)
-phoneElement = browser.find_element_by_name("username")
-phoneElement.send_keys("kita50k")
-passElement = browser.find_element_by_name("password")
-passElement.send_keys("kaito0830")
-sleep(WAIT_TIME)
-# Pythonでログイン
-elem_login_btn = browser.find_element_by_css_selector('.sqdOP.L3NKy.y3zKF')
-elem_login_btn.click()
-sleep(WAIT_TIME)
-elem_after_btn = browser.find_element_by_css_selector(".sqdOP.yWX7d.y3zKF")
-elem_after_btn.click()
-sleep(WAIT_TIME)
-elem_watchStory_btn = browser.find_element_by_css_selector(".sqdOP.L3NKy.y1rQx.cB_4K")
-elem_watchStory_btn.click()
-sleep(WAIT_TIME * 0.5)
-elem_tag_video = browser.find_element_by_css_selector("video > source:first-child")
-url = elem_tag_video.get_attribute("src")
-print(url)
-saveMovie.saveMovie(url)
-browser.close()
+passwordLabel = tkinter.Label(text = "パスワードを入力してください")
+passwordLabel.place(x = LABEL_POS, y = 50)
+passwordBox = tkinter.Entry(show = "*", width = 30)
+passwordBox.place(x = TEXTBOX_POS, y = BASE_VERTICAL_POS + VERTICAL_SPACE * 2)
 
+#ボタン
+Button = tkinter.Button(text=u'動画作成', width=25)
+Button.bind("<Button-1>",DeleteEntryValue)
+Button.place(x=105, y=80)
+root.mainloop()
+
+#Scraping.getMovie()
